@@ -28,7 +28,7 @@ func parseGraphiteResponse(r io.Reader, metric string) (float64, error) {
 
 	err = json.Unmarshal(body, &targets)
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	for _, v := range targets {
