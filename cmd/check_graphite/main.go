@@ -13,6 +13,7 @@ func main() {
 	p := nagios.NewPlugin("gaphite-data", fs)
 	p.StringFlag("graphite", "", "Graphite render URL: http://localhost/graphite/render/")
 	p.StringFlag("metric", "", "Target metric name")
+	p.StringFlag("target", "", "The target to search for in output.  Leave black and it will look for metric.")
 	p.StringFlag("username", "", "Username for basic auth")
 	p.StringFlag("password", "", "Password for basic auth")
 	flag.Parse()
@@ -24,8 +25,13 @@ func main() {
 	}
 
 	metric := p.OptRequiredString("metric")
+	target, _ := p.OptString("target")
 	username, _ := p.OptString("username")
 	password, _ := p.OptString("password")
+
+	if target == "" {
+		target = metric
+	}
 
 	v := url.Query()
 	v.Add("format", "json")
@@ -56,7 +62,7 @@ func main() {
 		p.Fatalf("got non 200 http status from graphite: %d", resp.StatusCode)
 	}
 
-	value, err := parseGraphiteResponse(resp.Body, metric)
+	value, err := parseGraphiteResponse(resp.Body, target)
 	if err != nil {
 		p.Fatal(err)
 	}
